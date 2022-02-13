@@ -171,7 +171,7 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
         SnackBar snackBarSucesso =
             SnackBar(content: Text(Textos.sucessoGerarArquivo));
         ScaffoldMessenger.of(context).showSnackBar(snackBarSucesso);
-        ServicoGerarArquivo.abrirNavegador();
+        ServicoGerarArquivo.abrirNavegador(ServicoPesquisa.tituloLetra);
       });
     } else {
       SnackBar snackBarErro = SnackBar(content: Text(Textos.erroGerarArquivo));

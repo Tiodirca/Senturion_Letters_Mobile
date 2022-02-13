@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' show parse;
-import 'package:senturionletters/Uteis/Servicos/ServicoPesquisa.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ServicoGerarArquivo {
@@ -17,7 +16,6 @@ class ServicoGerarArquivo {
       final response = await http.post(linkGerarArquivo,
           body: {'textos': letra, 'titulo': titulo, 'modelo': tipoModelo});
       var retornoResposta = parse(response.body);
-
       if (retornoResposta.outerHtml.contains("sucesso")) {
         return true;
       } else {
@@ -29,15 +27,13 @@ class ServicoGerarArquivo {
     }
   }
 
-  static abrirNavegador() async {
+  static abrirNavegador(titulo) async {
     //metodo para abrir o navegador do celular no url passada
-    ServicoPesquisa.tituloLetra;
-    var titulo = ServicoPesquisa.tituloLetra;
     var url = "http://192.168.1.5:35408/baixarArquivo/$titulo";
     if (await canLaunch(url)) {
       await launch(url);
       Timer(const Duration(seconds: 10), () async {
-        //excluirArquivoDoBackEnd(titulo);
+        excluirArquivoDoBackEnd(titulo);
       });
     } else {
       throw 'Could not launch $url';
