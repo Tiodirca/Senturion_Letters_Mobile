@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:senturionletters/Uteis/Textos.dart';
 
@@ -8,14 +9,11 @@ class Editar extends StatefulWidget {
   final String tipoModelo;
 
   const Editar(
-      {Key? key,
-      required this.retornoPesquisa,
-      required this.tipoModelo})
+      {Key? key, required this.retornoPesquisa, required this.tipoModelo})
       : super(key: key);
 
   @override
-  _EditarState createState() =>
-      _EditarState(retornoPesquisa, tipoModelo);
+  _EditarState createState() => _EditarState(retornoPesquisa, tipoModelo);
 }
 
 class _EditarState extends State<Editar> {
@@ -25,8 +23,7 @@ class _EditarState extends State<Editar> {
   bool exibirLogo = false;
   int valorRadioButton = 0;
 
-  _EditarState(
-      this.retornoPesquisaEditar, this.tipoModelo);
+  _EditarState(this.retornoPesquisaEditar, this.tipoModelo);
 
   recuperarTituloLetra() async {
     await ServicoPesquisa.exibirTituloLetra().then((valor) {
@@ -44,7 +41,7 @@ class _EditarState extends State<Editar> {
         exibirLogo = true;
         valorRadioButton = 1;
       });
-    }else{
+    } else {
       setState(() {
         valorRadioButton = 0;
       });
@@ -100,34 +97,42 @@ class _EditarState extends State<Editar> {
                 child: Column(
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 10.0, horizontal: 10.0),
-                      child: Text(
-                        Textos.txtDescricaoEditar,
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    Text(
-                      tituloLetra,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black),
-                    ),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 10.0, horizontal: 10.0),
+                        child: Column(
+                          children: [
+                            Text(
+                              Textos.txtDescricaoEditar,
+                              textAlign: TextAlign.center,
+                            ),
+                            Text(Textos.txtDescricaoEditarAdd),
+                            Text(Textos.txtDescricaoEditarExcluir),
+                            Text(
+                              tituloLetra,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black),
+                            ),
+                          ],
+                        )),
                     const SizedBox(
                       height: 5,
                     ),
                     Container(
                       padding: const EdgeInsets.only(bottom: 0.0),
-                      height: altura * 0.75 - alturaAppBar - alturaBarraStatus,
+                      height: altura * 0.70 - alturaAppBar - alturaBarraStatus,
                       child: ListView.builder(
                           itemCount: retornoPesquisaEditar.length,
                           itemBuilder: (context, index) {
                             return ListTile(
-                                title: Container(
+                                title: Column(
+                              children: [
+                                Text("N° slide abaixo: $index"),
+                                Container(
                                     width: largura,
-                                    padding: const EdgeInsets.all(5),
+                                    padding: const EdgeInsets.only(left: 5.0,bottom: 0.0,right: 5.0,top: 5.0),
                                     decoration: const BoxDecoration(
                                         image: DecorationImage(
                                             image: AssetImage(
@@ -188,23 +193,22 @@ class _EditarState extends State<Editar> {
                                             ],
                                           ),
                                         ),
-                                        const SizedBox(
-                                          height: 20,
-                                        ),
+
                                         TextFormField(
                                           textAlign: TextAlign.center,
                                           initialValue:
-                                              retornoPesquisaEditar[index].toString()
+                                              retornoPesquisaEditar[index]
+                                                  .toString()
                                                   .replaceAll(
-                                                  RegExp(
-                                                    r'</p>',
-                                                  ),
-                                                  '')
+                                                      RegExp(
+                                                        r'</p>',
+                                                      ),
+                                                      '')
                                                   .replaceAll(
-                                                  RegExp(
-                                                    r'<br>',
-                                                  ),
-                                                  '\n'),
+                                                      RegExp(
+                                                        r'<br>',
+                                                      ),
+                                                      '\n'),
                                           onChanged: (value) {
                                             retornoPesquisaEditar[index] =
                                                 value;
@@ -241,73 +245,143 @@ class _EditarState extends State<Editar> {
                                               ),
                                             ],
                                           ),
+                                          decoration:  const InputDecoration(
+                                              focusedBorder: InputBorder.none,
+                                              enabledBorder: InputBorder.none,
+                                        )
+                                        ),
+                                        Row(
+                                          mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                          children: [
+                                            IconButton(
+                                                icon: const Icon(Icons.add),
+                                                color: Colors.black,
+                                                iconSize: 30,
+                                                onPressed: () {
+                                                  retornoPesquisaEditar.insert(
+                                                      index + 1, "");
+                                                  var dadosTela = {};
+                                                  dadosTela['letra'] =
+                                                      retornoPesquisaEditar;
+                                                  dadosTela['tipoModelo'] =
+                                                      tipoModelo;
+                                                  Navigator
+                                                      .pushReplacementNamed(
+                                                      context, "/editar",
+                                                      arguments: dadosTela);
+                                                }),
+                                            IconButton(
+                                                icon: const Icon(Icons.close),
+                                                color: Colors.red,
+                                                iconSize: 30,
+                                                onPressed: () {
+                                                  if (retornoPesquisaEditar
+                                                      .length ==
+                                                      1) {
+                                                    SnackBar snackBarErro =
+                                                    SnackBar(
+                                                        content: Text(Textos
+                                                            .erroEdicaoLetra));
+                                                    ScaffoldMessenger.of(
+                                                        context)
+                                                        .showSnackBar(
+                                                        snackBarErro);
+                                                  } else {
+                                                    retornoPesquisaEditar
+                                                        .removeAt(index);
+                                                    var dadosTela = {};
+                                                    dadosTela['letra'] =
+                                                        retornoPesquisaEditar;
+                                                    dadosTela['tipoModelo'] =
+                                                        tipoModelo;
+                                                    Navigator
+                                                        .pushReplacementNamed(
+                                                        context, "/editar",
+                                                        arguments:
+                                                        dadosTela);
+                                                  }
+                                                }),
+                                          ],
                                         )
                                       ],
-                                    )));
+                                    ))
+                              ],
+                            ));
                           }),
                     ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(vertical: 0.0,horizontal: 10.0),
-                          child: Text(Textos.txtSelecaoRadioEditar,textAlign: TextAlign.center),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 0.0, horizontal: 10.0),
+                      child: Text(Textos.txtSelecaoRadioEditar,
+                          textAlign: TextAlign.center),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: 25,
+                          height: 25,
+                          child: Image.asset(
+                            'assets/imagens/logo.png',
+                          ),
                         ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            SizedBox(
-                              width: 25,
-                              height: 25,
-                              child: Image.asset(
-                                'assets/imagens/logo.png',
-                              ),
-                            ),
-                            Radio(
-                                value: 0,
-                                groupValue: valorRadioButton,
-                                onChanged: (_) {
-                                  mudarRadioButton(0);
-                                }),
-                            const Text(
-                              'Modelo Geral',
-                            ),
-                            const SizedBox(
-                              width: 10,
-                            ),
-                            SizedBox(
-                              width: 25,
-                              height: 25,
-                              child: Image.asset(
-                                'assets/imagens/logoGeracaoFire.png',
-                              ),
-                            ),
-                            Radio(
-                                value: 1,
-                                groupValue: valorRadioButton,
-                                onChanged: (_) {
-                                  mudarRadioButton(1);
-                                }),
-                            const Text(
-                              'Geração Fire',
-                              style: TextStyle(
-                                fontSize: 16.0,
-                              ),
-                            ),
-                          ],
+                        Radio(
+                            value: 0,
+                            groupValue: valorRadioButton,
+                            onChanged: (_) {
+                              mudarRadioButton(0);
+                            }),
+                        const Text(
+                          'Modelo Geral',
                         ),
-                        Container(
-                          alignment: Alignment.bottomCenter,
-                          child: IconButton(
-                              icon: const Icon(Icons.done_outline),
-                              color: Colors.black,
-                              iconSize: 30,
-                              onPressed: () {
-                                var dadosTela = {};
-                                dadosTela["letra"] = retornoPesquisaEditar;
-                                dadosTela["tipoModelo"] = tipoModelo;
-                                Navigator.pushReplacementNamed(
-                                    context, "/telaPrincipal",
-                                    arguments: dadosTela);
-                              }),
-                        )
+                        const SizedBox(
+                          width: 10,
+                        ),
+                        SizedBox(
+                          width: 25,
+                          height: 25,
+                          child: Image.asset(
+                            'assets/imagens/logoGeracaoFire.png',
+                          ),
+                        ),
+                        Radio(
+                            value: 1,
+                            groupValue: valorRadioButton,
+                            onChanged: (_) {
+                              mudarRadioButton(1);
+                            }),
+                        const Text(
+                          'Geração Fire',
+                          style: TextStyle(
+                            fontSize: 16.0,
+                          ),
+                        ),
+                      ],
+                    ),
+                    IconButton(
+                        icon: const Icon(Icons.done_outline),
+                        color: Colors.black,
+                        iconSize: 30,
+                        onPressed: () {
+                          var dadosTela = {};
+                          dadosTela["letra"] = retornoPesquisaEditar;
+                          dadosTela["tipoModelo"] = tipoModelo;
+                          //verificando se todos os index da lista nao estao vazios
+                          var slideVazio = [...retornoPesquisaEditar]
+                              .every((el) => el.toString().isNotEmpty);
+                          if (slideVazio) {
+                            //caso nenhum index tiver vazio trocar de tela caso contrario mostrar erro
+                            Navigator.pushReplacementNamed(
+                                context, "/telaPrincipal",
+                                arguments: dadosTela);
+                          } else {
+                            SnackBar snackBarErro = SnackBar(
+                                content: Text(Textos.erroEdicaoSlideVazio));
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(snackBarErro);
+                          }
+                        }),
                   ],
                 )),
           ],

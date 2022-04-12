@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:senturionletters/Uteis/Constantes.dart';
 import '../Uteis/Servicos/ServicoPesquisa.dart';
+import '../Uteis/Textos.dart';
 
 class Listagem extends StatefulWidget {
   final List retornoPesquisa;
@@ -32,7 +34,7 @@ class _ListagemState extends State<Listagem> {
     await ServicoPesquisa.exibirTituloLetra().then((valor) {
       setState(() {
         tituloLetra = valor;
-        if (tipoModelo == "geracaoFire") {
+        if (tipoModelo == Contantes.tipoRadioGeracao) {
           setState(() {
             exibirLogo = true;
           });
@@ -63,14 +65,21 @@ class _ListagemState extends State<Listagem> {
     return SingleChildScrollView(
       child: Column(
         children: [
-          Text(
-            tituloLetra,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-                fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(Textos.txtNomeMusica),
+              Text(
+                tituloLetra,
+                style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black),
+              ),
+            ],
           ),
           SizedBox(
-            height: altura * 0.65 - alturaAppBar - alturaBarraStatus,
+            height: altura * 0.7 - alturaAppBar - alturaBarraStatus,
             child: ListView.builder(
                 itemCount: retornoPesquisa.length,
                 itemBuilder: (context, index) {

@@ -4,6 +4,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:senturionletters/Telas/Listagem.dart';
+import 'package:senturionletters/Uteis/Constantes.dart';
 import 'package:senturionletters/Uteis/Servicos/ServicoGerarArquivo.dart';
 import 'package:senturionletters/Uteis/Textos.dart';
 import 'package:senturionletters/Telas/Carregamentos/TelaCarregamento.dart';
@@ -27,17 +28,12 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
   TextEditingController controllerPesquisa = TextEditingController(text: "");
   final chaveFormulario = GlobalKey<FormState>();
 
-  bool telaCarregamento = false;
-  bool campoPesquisa = true;
-  bool campoListagemEAcao = false;
-  bool exibirRadioButton = false;
+  String tipoTelaExibir = Contantes.telaExibirInicio;
   bool exibirBotoesAcoes = false;
-  bool exibirLetra = false;
   List retornoPesquisa = [];
-  String retorno = "";
   int valorRadioButton = -1;
   String removerItemLista = "";
-  String tipoModelo = "geral";
+  String tipoModelo = Contantes.tipoRadioGeral;
 
   _TelaPrincipalState(this.retornoPesquisa, this.tipoModelo);
 
@@ -93,15 +89,11 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
       ScaffoldMessenger.of(context).showSnackBar(snackBarErro);
       controllerPesquisa.text = "";
       setState(() {
-        telaCarregamento = false;
-        campoPesquisa = true;
+        tipoTelaExibir = Contantes.telaExibirInicio;
       });
     } else if (retornoPesquisa.isNotEmpty) {
       setState(() {
-        telaCarregamento = false;
-        campoPesquisa = true;
-        campoListagemEAcao = true;
-        exibirRadioButton = true;
+        tipoTelaExibir = Contantes.telaExibirRadioButton;
         valorRadioButton = -1;
       });
     }
@@ -121,8 +113,7 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
       ScaffoldMessenger.of(context).showSnackBar(snackBarErro);
       controllerPesquisa.text = "";
       setState(() {
-        telaCarregamento = false;
-        campoPesquisa = true;
+        tipoTelaExibir = Contantes.telaExibirInicio;
       });
     } else if (retornoPesquisa.isNotEmpty) {
       chamarMetodoPesquisarLetra(retornoPesquisa);
@@ -135,8 +126,7 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
     if (retornoPesquisa.isNotEmpty) {
       setState(() {
         recuperarTituloLetra();
-        campoListagemEAcao = true;
-        exibirLetra = true;
+        tipoTelaExibir = Contantes.telaExibirlistagem;
         exibirBotoesAcoes = true;
       });
     }
@@ -163,49 +153,44 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
     if (retorno) {
       Timer(const Duration(seconds: 5), () {
         setState(() {
-          telaCarregamento = false;
-          campoPesquisa = true;
-          campoListagemEAcao = true;
-          exibirBotoesAcoes = true;
+          tipoTelaExibir = Contantes.telaExibirCarregamento;
+          exibirBotoesAcoes = false;
         });
         SnackBar snackBarSucesso =
             SnackBar(content: Text(Textos.sucessoGerarArquivo));
         ScaffoldMessenger.of(context).showSnackBar(snackBarSucesso);
         ServicoGerarArquivo.abrirNavegador(ServicoPesquisa.tituloLetra);
+        setState(() {
+          tipoTelaExibir = Contantes.telaExibirlistagem;
+          exibirBotoesAcoes = true;
+        });
       });
+
     } else {
       SnackBar snackBarErro = SnackBar(content: Text(Textos.erroGerarArquivo));
       ScaffoldMessenger.of(context).showSnackBar(snackBarErro);
       setState(() {
-        telaCarregamento = false;
-        campoPesquisa = true;
-        campoListagemEAcao = true;
+        tipoTelaExibir = Contantes.telaExibirlistagem;
         exibirBotoesAcoes = true;
       });
     }
   }
 
-
-
   void mudarRadioButton(int value) {
     //metodo para mudar o estado do radio button
     setState(() {
       valorRadioButton = value;
+      tipoTelaExibir = Contantes.telaExibirlistagem;
+      exibirBotoesAcoes = true;
       switch (valorRadioButton) {
         case 0:
           setState(() {
-            tipoModelo = "geral";
-            exibirLetra = true;
-            exibirRadioButton = false;
-            exibirBotoesAcoes = true;
+            tipoModelo = Contantes.tipoRadioGeral;
           });
           break;
         case 1:
           setState(() {
-            tipoModelo = "geracaoFire";
-            exibirLetra = true;
-            exibirRadioButton = false;
-            exibirBotoesAcoes = true;
+            tipoModelo = Contantes.tipoRadioGeracao;
           });
           break;
       }
@@ -228,228 +213,232 @@ class _TelaPrincipalState extends State<TelaPrincipal> {
         child: SizedBox(
           width: largura,
           height: altura - alturaBarraStatus - alturaAppBar,
-          child: Column(
-            children: [
-              Visibility(
-                  visible: campoPesquisa,
-                  child: Column(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 5.0, horizontal: 10.0),
-                        child: Text(
-                          Textos.txtDescricaoPesquisa,
-                          textAlign: TextAlign.center,
-                        ),
+          child: LayoutBuilder(
+            builder: (BuildContext context, BoxConstraints constraints) {
+              if (tipoTelaExibir == Contantes.telaExibirInicio) {
+                return Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 5.0, horizontal: 10.0),
+                      child: Text(
+                        Textos.txtDescricaoPesquisa,
+                        textAlign: TextAlign.center,
                       ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          //CAIXA DE PESQUISA
-                          SizedBox(
-                            height: altura * 0.12,
-                            child: Container(
-                                alignment: Alignment.center,
-                                width: largura * 0.65,
-                                child: Form(
-                                  key: chaveFormulario,
-                                  child: TextFormField(
-                                      controller: controllerPesquisa,
-                                      validator: (value) {
-                                        if (value!.isEmpty) {
-                                          return Textos.erroCampoPesquisa;
-                                        }
-                                        return null;
-                                      },
-                                      decoration: InputDecoration(
-                                          enabledBorder: OutlineInputBorder(
-                                            borderSide: const BorderSide(
-                                                width: 1, color: Colors.black),
-                                            borderRadius:
-                                                BorderRadius.circular(10),
-                                          ),
-                                          errorBorder: OutlineInputBorder(
-                                            borderSide: const BorderSide(
-                                                width: 1, color: Colors.red),
-                                            borderRadius:
-                                                BorderRadius.circular(10),
-                                          ),
-                                          focusedErrorBorder:
-                                              OutlineInputBorder(
-                                            borderSide: const BorderSide(
-                                                width: 1, color: Colors.black),
-                                            borderRadius:
-                                                BorderRadius.circular(10),
-                                          ),
-                                          focusedBorder: OutlineInputBorder(
-                                              borderSide: const BorderSide(
-                                                  width: 1,
-                                                  color: Colors.black),
-                                              borderRadius:
-                                                  BorderRadius.circular(10)))),
-                                )),
-                          ),
-                          //BOTAO DE PESQUISA
-                          Container(
-                            alignment: Alignment.center,
-                            margin: const EdgeInsets.only(
-                                left: 5.0, top: 0.0, bottom: 0.0, right: 5.0),
-                            width: 100.0,
-                            height: 100.0,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                if (chaveFormulario.currentState!.validate()) {
-                                  //verificando conexao com a internet
-                                  if (_connectionStatus.toString() ==
-                                      "ConnectivityResult.none") {
-                                    SnackBar snackBarErroConexao = SnackBar(
-                                        content: Text(Textos.erroConexao));
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(snackBarErroConexao);
-                                  } else {
-                                    setState(() {
-                                      telaCarregamento = true;
-                                      campoPesquisa = false;
-                                      campoListagemEAcao = false;
-                                      exibirLetra = false;
-                                      exibirBotoesAcoes = false;
-                                      retornoPesquisa = [];
-                                      removerItemLista = "removerItem";
-                                    });
-                                    chamarMetodoPesquisa();
-                                  }
-                                }
-                              },
-                              child: Text(Textos.btnPesquisar),
-                            ),
-                          )
-                        ],
-                      ),
-                    ],
-                  )),
-              //TELA CARREGAMENTO
-              Visibility(
-                  visible: telaCarregamento,
-                  child: SizedBox(
-                      height: altura - alturaAppBar - alturaBarraStatus,
-                      child: const Center(
-                          child: SizedBox(
-                              height: 150, child: TelaCarregamento())))),
-              Visibility(
-                  visible: campoListagemEAcao,
-                  child: Column(
-                    children: [
-                      Visibility(
-                        visible: exibirLetra,
-                        child: Listagem(
-                          retornoPesquisa: retornoPesquisa,
-                          remocaoItemLista: removerItemLista,
-                          tipoModelo: tipoModelo,
-                        ),
-                      ),
-                      //BOTOES DE ACAO
-
-                      Visibility(
-                          visible: exibirRadioButton,
-                          child: Column(
-                            children: [
-                              Text(Textos.txtSelecaoRadio),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  SizedBox(
-                                    width: 25,
-                                    height: 25,
-                                    child: Image.asset(
-                                      'assets/imagens/logo.png',
-                                    ),
-                                  ),
-                                  Radio(
-                                      value: 0,
-                                      groupValue: valorRadioButton,
-                                      onChanged: (_) {
-                                        mudarRadioButton(0);
-                                      }),
-                                  const Text(
-                                    'Modelo Geral',
-                                  ),
-                                  const SizedBox(
-                                    width: 10,
-                                  ),
-                                  SizedBox(
-                                    width: 25,
-                                    height: 25,
-                                    child: Image.asset(
-                                      'assets/imagens/logoGeracaoFire.png',
-                                    ),
-                                  ),
-                                  Radio(
-                                      value: 1,
-                                      groupValue: valorRadioButton,
-                                      onChanged: (_) {
-                                        mudarRadioButton(1);
-                                      }),
-                                  const Text(
-                                    'Geração Fire',
-                                    style: TextStyle(
-                                      fontSize: 16.0,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          )),
-                      Visibility(
-                          visible: exibirBotoesAcoes,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              IconButton(
-                                icon: const Icon(
-                                    Icons.mode_edit_outline_outlined),
-                                color: Colors.amber,
-                                iconSize: 40,
-                                onPressed: () {
-                                  var dadosTela = {};
-                                  dadosTela['letra'] = retornoPesquisa;
-                                  dadosTela['tipoModelo'] = tipoModelo;
-                                  Navigator.pushReplacementNamed(
-                                      context, "/editar",
-                                      arguments: dadosTela);
-                                },
-                              ),
-                              SizedBox(
-                                  width: 150,
-                                  height: 50,
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      chamarGerarArquivo();
-                                      setState(() {
-                                        telaCarregamento = true;
-                                        campoPesquisa = false;
-                                        campoListagemEAcao = false;
-                                        exibirBotoesAcoes = false;
-                                        removerItemLista = "";
-                                      });
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        //CAIXA DE PESQUISA
+                        SizedBox(
+                          height: altura * 0.12,
+                          child: Container(
+                              alignment: Alignment.center,
+                              width: largura * 0.65,
+                              child: Form(
+                                key: chaveFormulario,
+                                child: TextFormField(
+                                    controller: controllerPesquisa,
+                                    validator: (value) {
+                                      if (value!.isEmpty) {
+                                        return Textos.erroCampoPesquisa;
+                                      }
+                                      return null;
                                     },
-                                    style: ElevatedButton.styleFrom(
-                                        primary: Colors.green),
-                                    child: Text(
-                                      Textos.btnGerarArquivo,
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(
-                                        fontSize: 18,
-                                      ),
-                                    ),
-                                  )),
-                            ],
-                          ))
-                    ],
-                  )),
-            ],
+                                    decoration: InputDecoration(
+                                        enabledBorder: OutlineInputBorder(
+                                          borderSide: const BorderSide(
+                                              width: 1, color: Colors.black),
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                        errorBorder: OutlineInputBorder(
+                                          borderSide: const BorderSide(
+                                              width: 1, color: Colors.red),
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                        focusedErrorBorder: OutlineInputBorder(
+                                          borderSide: const BorderSide(
+                                              width: 1, color: Colors.black),
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                            borderSide: const BorderSide(
+                                                width: 1, color: Colors.black),
+                                            borderRadius:
+                                                BorderRadius.circular(10)))),
+                              )),
+                        ),
+                        //BOTAO DE PESQUISA
+                        Container(
+                          alignment: Alignment.center,
+                          margin: const EdgeInsets.only(
+                              left: 5.0, top: 0.0, bottom: 0.0, right: 5.0),
+                          width: 100.0,
+                          height: 100.0,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              if (chaveFormulario.currentState!.validate()) {
+                                //verificando conexao com a internet
+                                if (_connectionStatus.toString() ==
+                                    "ConnectivityResult.none") {
+                                  SnackBar snackBarErroConexao = SnackBar(
+                                      content: Text(Textos.erroConexao));
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(snackBarErroConexao);
+                                } else {
+                                  setState(() {
+                                    tipoTelaExibir =
+                                        Contantes.telaExibirCarregamento;
+                                    retornoPesquisa = [];
+                                    removerItemLista = "removerItem";
+                                  });
+                                  chamarMetodoPesquisa();
+                                }
+                              }
+                            },
+                            child: Text(Textos.btnPesquisar),
+                          ),
+                        )
+                      ],
+                    ),
+                  ],
+                );
+              } else if (tipoTelaExibir == Contantes.telaExibirCarregamento) {
+                return SizedBox(
+                    height: altura - alturaAppBar - alturaBarraStatus,
+                    child: const Center(
+                        child:
+                            SizedBox(height: 150, child: TelaCarregamento())));
+              } else if (tipoTelaExibir == Contantes.telaExibirRadioButton) {
+                return Column(
+                  children: [
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Text(Textos.txtSelecaoRadio),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: 25,
+                          height: 25,
+                          child: Image.asset(
+                            'assets/imagens/logo.png',
+                          ),
+                        ),
+                        Radio(
+                            value: 0,
+                            groupValue: valorRadioButton,
+                            onChanged: (_) {
+                              mudarRadioButton(0);
+                            }),
+                        const Text(
+                          'Modelo Geral',
+                        ),
+                        const SizedBox(
+                          width: 10,
+                        ),
+                        SizedBox(
+                          width: 25,
+                          height: 25,
+                          child: Image.asset(
+                            'assets/imagens/logoGeracaoFire.png',
+                          ),
+                        ),
+                        Radio(
+                            value: 1,
+                            groupValue: valorRadioButton,
+                            onChanged: (_) {
+                              mudarRadioButton(1);
+                            }),
+                        const Text(
+                          'Geração Fire',
+                          style: TextStyle(
+                            fontSize: 16.0,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                );
+              } else if (tipoTelaExibir == Contantes.telaExibirlistagem) {
+                return Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: FloatingActionButton(
+                          child: const Icon(
+                            Icons.close_outlined,
+                            size: 40,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              tipoTelaExibir = Contantes.telaExibirInicio;
+                              exibirBotoesAcoes = false;
+                              controllerPesquisa.text = "";
+                            });
+                          }),
+                    ),
+                    Listagem(
+                      retornoPesquisa: retornoPesquisa,
+                      remocaoItemLista: removerItemLista,
+                      tipoModelo: tipoModelo,
+                    ),
+                  ],
+                );
+              } else {
+                return Container();
+              }
+            },
           ),
         ),
       )),
+      bottomSheet: Visibility(
+          visible: exibirBotoesAcoes,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.mode_edit_outline_outlined),
+                color: Colors.amber,
+                iconSize: 40,
+                onPressed: () {
+                  var dadosTela = {};
+                  dadosTela['letra'] = retornoPesquisa;
+                  dadosTela['tipoModelo'] = tipoModelo;
+                  Navigator.pushReplacementNamed(context, "/editar",
+                      arguments: dadosTela);
+                },
+              ),
+              SizedBox(
+                  width: 150,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      chamarGerarArquivo();
+                      setState(() {
+                        tipoTelaExibir = Contantes.telaExibirCarregamento;
+                        exibirBotoesAcoes = false;
+                        removerItemLista = "";
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(primary: Colors.green),
+                    child: Text(
+                      Textos.btnGerarArquivo,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 18,
+                      ),
+                    ),
+                  )),
+            ],
+          )),
     );
   }
 }
